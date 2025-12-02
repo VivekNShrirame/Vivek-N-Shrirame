@@ -1,0 +1,5 @@
+{
+  "name": "Robocrats AI Resume Parser",
+  "description": "An application to parse resumes in PDF, Word, or image format using AI. It extracts candidate details into a structured table and allows exporting the data to an Excel file.",
+  "requestFramePermissions": []
+}
