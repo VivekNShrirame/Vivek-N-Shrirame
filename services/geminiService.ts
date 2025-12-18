@@ -302,7 +302,8 @@ export const analyzeCandidateMatch = async (candidate: Candidate, jobDescription
             2. Provide a detailed match reason.
                - Explicitly list the **Strong Matches**: What key skills or experience does the candidate possess that align with the JD?
                - Explicitly list the **Gaps/Missing**: What critical skills or experience are missing or insufficient?
-               - Be specific (e.g., "Matches: React, Node.js. Missing: AWS certification").
+               - **Formatting Rule**: Enclose every specific skill, technology, or qualification mentioned in backticks (\`). Example: "Strong match for \`React\` and \`Node.js\`, but missing \`AWS\`."
+               - Be specific (e.g., "Matches: \`React\`, \`Node.js\`. Missing: \`AWS certification\`").
             
             Return JSON.
         `;

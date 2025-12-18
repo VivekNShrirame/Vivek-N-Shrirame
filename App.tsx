@@ -427,33 +427,43 @@ export default function App() {
         </header>
 
         <main className="space-y-8">
-          {/* Upload Section */}
-          <section className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-700 p-6 md:p-8 relative overflow-hidden">
-             <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full filter blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-             <div className="absolute bottom-0 left-0 w-32 h-32 bg-violet-500/10 rounded-full filter blur-3xl translate-y-1/2 -translate-x-1/2"></div>
+          {/* Top Section: Split Layout for Upload and Job Description */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Left Column: Upload Section */}
+              <section className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-700 p-6 md:p-8 relative overflow-hidden flex flex-col h-full">
+                 <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full filter blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+                 <div className="absolute bottom-0 left-0 w-32 h-32 bg-violet-500/10 rounded-full filter blur-3xl translate-y-1/2 -translate-x-1/2"></div>
 
-             <div className="flex justify-between items-center mb-6 relative z-10">
-                 <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Upload Resumes</h2>
-                 <label className="inline-flex items-center cursor-pointer group">
-                  <input 
-                    type="checkbox" 
-                    checked={isAutoParse} 
-                    onChange={() => setIsAutoParse(!isAutoParse)} 
-                    className="sr-only peer"
+                 <div className="flex justify-between items-center mb-6 relative z-10">
+                     <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Upload Resumes</h2>
+                     <label className="inline-flex items-center cursor-pointer group">
+                      <input 
+                        type="checkbox" 
+                        checked={isAutoParse} 
+                        onChange={() => setIsAutoParse(!isAutoParse)} 
+                        className="sr-only peer"
+                      />
+                      <div className="relative w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
+                      <span className="ms-3 text-sm font-medium text-slate-600 dark:text-slate-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">Auto-parse</span>
+                    </label>
+                 </div>
+                <FileUpload onFilesSelected={handleFiles} statuses={fileStatuses} />
+              </section>
+
+              {/* Right Column: Job Description Section */}
+              <section className="h-full">
+                  <JobAnalysisSection 
+                    onAnalyze={handleJobAnalysis} 
+                    isAnalyzing={isAnalyzingJob} 
+                    hasCandidates={candidates.length > 0}
                   />
-                  <div className="relative w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
-                  <span className="ms-3 text-sm font-medium text-slate-600 dark:text-slate-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">Auto-parse Mode</span>
-                </label>
-             </div>
-            <FileUpload onFilesSelected={handleFiles} statuses={fileStatuses} />
-          </section>
+              </section>
+          </div>
 
           {/* Results Section */}
           {candidates.length > 0 && (
             <div className="space-y-6 animate-fade-in">
               
-              <JobAnalysisSection onAnalyze={handleJobAnalysis} isAnalyzing={isAnalyzingJob} />
-
               {/* Sticky Actions Toolbar */}
               <div className="sticky top-20 z-30 bg-white/90 dark:bg-slate-800/90 backdrop-blur shadow-lg rounded-xl border border-slate-200 dark:border-slate-700 p-3 flex flex-col sm:flex-row items-center justify-between gap-4 transition-all">
                    <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -479,7 +489,7 @@ export default function App() {
                               </div>
                           </div>
                       ) : (
-                          <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-200 px-2 hidden sm:block">Candidates</h3>
+                          <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-200 px-2 hidden sm:block">Parsed Results</h3>
                       )}
                    </div>
 

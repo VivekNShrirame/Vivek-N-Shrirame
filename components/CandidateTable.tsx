@@ -1,4 +1,3 @@
-
 import React from 'react';
 import type { Candidate } from '../types';
 import { ArrowUpIcon, ArrowDownIcon, StarIcon } from './icons';
@@ -35,10 +34,10 @@ const CandidateTable: React.FC<CandidateTableProps> = ({
   }
 
   const getMatchColor = (score?: number) => {
-      if (score === undefined) return 'text-slate-300 dark:text-slate-600';
-      if (score >= 75) return 'text-emerald-500 dark:text-emerald-400';
-      if (score >= 50) return 'text-amber-500 dark:text-amber-400';
-      return 'text-rose-500 dark:text-rose-400';
+      if (score === undefined) return 'bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400';
+      if (score >= 75) return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300';
+      if (score >= 50) return 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300';
+      return 'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300';
   };
 
   const getInitials = (name: string) => {
@@ -50,45 +49,34 @@ const CandidateTable: React.FC<CandidateTableProps> = ({
         .toUpperCase();
   };
 
-  // SVG Gauge Component
-  const MatchGauge = ({ score }: { score?: number }) => {
-      if (score === undefined) return <span className="text-xs text-slate-400 font-medium">--</span>;
-      
-      const radius = 16;
-      const circumference = 2 * Math.PI * radius;
-      const offset = circumference - (score / 100) * circumference;
-      const colorClass = getMatchColor(score);
+  const formatMatchReason = (text: string) => {
+    // Basic bolding for Strong Matches/Gaps headers for better readability
+    const parts = text.split(/(`[^`]+`)/);
+    
+    return (
+        <span>
+            {parts.map((part, index) => {
+                if (part.startsWith('`') && part.endsWith('`')) {
+                    const content = part.slice(1, -1);
+                    return (
+                        <span key={index} className="inline-block bg-slate-700 text-slate-100 px-1.5 py-0.5 rounded border border-slate-600 font-mono text-[10px] mx-0.5 align-middle shadow-sm">
+                            {content}
+                        </span>
+                    );
+                }
+                
+                // Optional: Highlight typical headers if they exist in plain text
+                if (part.includes('Strong Matches')) {
+                    return <span key={index} className="font-bold text-emerald-400">{part}</span>;
+                }
+                if (part.includes('Gaps') || part.includes('Missing')) {
+                     return <span key={index} className="font-bold text-rose-400">{part}</span>;
+                }
 
-      return (
-        <div className="relative flex items-center justify-center w-10 h-10">
-             <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                {/* Background Circle */}
-                <path
-                    className="text-slate-200 dark:text-slate-700"
-                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="3"
-                />
-                {/* Progress Circle */}
-                <path
-                    className={`${colorClass} transition-all duration-1000 ease-out`}
-                    strokeDasharray={`${circumference} ${circumference}`}
-                    strokeDashoffset={offset}
-                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                />
-            </svg>
-            <div className="absolute inset-0 flex items-center justify-center">
-                <span className={`text-[10px] font-bold ${colorClass.replace('text-', 'text-slate-900 dark:text-white')}`}>
-                    {score}
-                </span>
-            </div>
-        </div>
-      );
+                return <span key={index}>{part}</span>;
+            })}
+        </span>
+    );
   };
 
   const allSelected = candidates.length > 0 && candidates.every(c => selectedIds.has(c.id));
@@ -148,6 +136,8 @@ const CandidateTable: React.FC<CandidateTableProps> = ({
         <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
             {candidates.map((candidate) => {
                 const isSelected = selectedIds.has(candidate.id);
+                const badgeColor = getMatchColor(candidate.matchScore);
+                
                 return (
                 <tr 
                     key={candidate.id} 
@@ -165,18 +155,25 @@ const CandidateTable: React.FC<CandidateTableProps> = ({
                         />
                     </td>
 
-                    {/* JD Match */}
+                    {/* JD Match (Badge Style) */}
                     <td className="px-6 py-4 align-middle whitespace-nowrap">
                         <div className="flex flex-col items-center justify-center">
                              <div className="group/tooltip relative cursor-help">
-                                 <MatchGauge score={candidate.matchScore} />
+                                 <div className={`text-sm font-bold px-3 py-1.5 rounded-full border border-transparent shadow-sm ${badgeColor}`}>
+                                     {candidate.matchScore !== undefined ? `${candidate.matchScore}%` : '--'}
+                                 </div>
                                  
-                                 {/* Tooltip */}
+                                 {/* Rich Tooltip */}
                                  {candidate.matchScore !== undefined && (
-                                     <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 p-3 bg-slate-900/95 backdrop-blur text-white text-xs rounded-lg shadow-xl opacity-0 group-hover/tooltip:opacity-100 transition-all duration-200 pointer-events-none z-50 whitespace-normal text-center scale-95 group-hover/tooltip:scale-100 border border-slate-700">
-                                         <p className="font-semibold mb-1 text-slate-300">Match Analysis</p>
-                                         <p>{candidate.matchReason || "No reason provided."}</p>
-                                         <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-slate-900/95"></div>
+                                     <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-80 p-4 bg-slate-900/95 backdrop-blur text-white text-xs rounded-xl shadow-2xl opacity-0 group-hover/tooltip:opacity-100 transition-all duration-200 pointer-events-none z-50 whitespace-normal text-left scale-95 group-hover/tooltip:scale-100 border border-slate-700 ring-1 ring-white/10">
+                                         <p className="font-bold mb-2 text-indigo-300 border-b border-slate-700 pb-2 flex items-center gap-2">
+                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                                            Match Analysis
+                                         </p>
+                                         <div className="leading-relaxed text-slate-300 space-y-1">
+                                            {formatMatchReason(candidate.matchReason || "No reason provided.")}
+                                         </div>
+                                         <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-8 border-transparent border-t-slate-900/95"></div>
                                      </div>
                                  )}
                              </div>
